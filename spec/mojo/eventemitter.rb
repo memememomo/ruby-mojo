@@ -93,9 +93,47 @@ describe "Mojo::EventEmitter" do
       expect(@once).to eq(1)
       @e.once('one_time', proc {|args|
                 obj = args.shift
-                obj.once('one_time', proc { $once += 1 })
+                obj.once('one_time', proc { @once += 1 })
               })
-      @e.emit('one_time');
+      @e.emit('one_time')
+      expect(@once).to eq(1)
+      @e.emit('one_time')
+      expect(@once).to eq(2)
+      @e.emit('one_time')
+      expect(@once).to eq(2)
+      @e.once('one_time', proc {|args|
+                obj = args[0]
+                @once = obj.has_subscribers('one_time')
+              })
+      @e.emit('one_time')
+      expect(@once).to eq(false)
+
+      # Nested one-time events
+      @once = 0
+      @e.once('one_time', proc {
+                |args|
+                obj = args[0]
+                obj.once('one_time', proc {
+                           |args|
+                           obj = args[0]
+                           obj.once('one_time', proc { @once += 1 })
+                         })
+              })
+      expect(@e.subscribers('one_time').length).to eq(1)
+      @e.emit('one_time')
+      expect(@once).to eq(0)
+      expect(@e.subscribers('one_time').length).to eq(1)
+      @e.emit('one_time')
+      expect(@once).to eq(0)
+      expect(@e.subscribers('one_time').length).to eq(1)
+      @e.emit('one_time')
+      expect(@once).to eq(1)
+      expect(@e.subscribers('one_time').length).to eq(0)
+      @e.emit('one_time')
+      expect(@once).to eq(1)
+      @e.emit('one_time')
+      expect(@once).to eq(1)
+      @e.emit('one_time')
       expect(@once).to eq(1)
     end
   end

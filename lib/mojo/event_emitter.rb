@@ -48,7 +48,7 @@ module Mojo
     end
 
     def has_subscribers(name)
-      !!self.subscribers(name).length
+      self.subscribers(name).length > 0 ? true : false
     end
 
     def on(name, cb)
