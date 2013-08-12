@@ -9,23 +9,22 @@ describe "Mojo::EventEmitter" do
   before do
     @e = Mojo::EventEmitter.new
     @called = 0
-      @echo = ""
-      @err = ""
+    @echo = ""
+    @err = ""
   end
 
   context 'Normal event' do
     it do
+      # Normal event
       @e.on('test1', proc { @called += 1 })
       @e.emit('test1')
-      expect(@called).to eq(1)
+      expect(@called).to eq(1) # event was emitted once
 
-
-
+      # Error
       @e.on("die", proc { raise "works!\n" })
-      expect { @e.emit('die') }.to raise_error("works!\n")
+      expect { @e.emit('die') }.to raise_error("works!\n") # right error
 
-
-
+      # Unhandled error event
       @tempfile = Tempfile.open("stdouttest")
       $stderr = File.open(@tempfile, "w")
       @e.emit("error", "just")
@@ -36,11 +35,10 @@ describe "Mojo::EventEmitter" do
       File.open(@tempfile) {|f|
         @error += f.read
       }
-      expect(@error).to eq("just\nworks\n")
+      expect(@error).to eq("just\nworks\n") # right error
 
 
-
-
+      # Error fallback
       @e.on('error', proc {|obj, args| @err = args.pop })
       @e.on('test2', proc {|obj, args| @echo += 'echo: ' + args.pop })
       @e.on('test2', proc {|obj, args|
@@ -50,61 +48,58 @@ describe "Mojo::EventEmitter" do
       cb = proc {|obj, args| @echo += 'echo2: ' + args.pop }
       @e.on('test2', cb)
       @e.emit_safe('test2', 'works!')
-      expect(@echo).to eq("echo: works!echo2: works!")
+      expect(@echo).to eq("echo: works!echo2: works!") # right echo
       @echo = ""
       @err = ""
-      expect(@e.subscribers('test2').length).to eq(3)
+      expect(@e.subscribers('test2').length).to eq(3) # three subscribers
       @e.unsubscribe('test2', cb)
-      expect(@e.subscribers('test2').length).to eq(2)
+      expect(@e.subscribers('test2').length).to eq(2) # two subscribers
       @e.emit_safe('test2', 'works!')
-      expect(@echo).to eq("echo: works!")
-      expect(@err).to eq("Event \"test2\" failed: test2: works!\n")
-
-
+      expect(@echo).to eq("echo: works!") # right echo
+      expect(@err).to eq("Event \"test2\" failed: test2: works!\n") # right error
 
 
       # Normal event again
       @e.emit('test1')
-      expect(@called).to eq(2)
-      expect(@e.subscribers('test1').length).to eq(1)
+      expect(@called).to eq(2) # event was emitted twice
+      expect(@e.subscribers('test1').length).to eq(1) # one subscriber
       @e.emit('test1')
       @e.unsubscribe('test1', @e.subscribers('test1')[0])
-      expect(@called).to eq(3)
-      expect(@e.subscribers('test1').length).to eq(0)
+      expect(@called).to eq(3) # event was emitted three times
+      expect(@e.subscribers('test1').length).to eq(0) # no subscribers
       @e.emit('test1')
-      expect(@called).to eq(3)
+      expect(@called).to eq(3) # event was not emitted again
       @e.emit('test1')
-      expect(@called).to eq(3)
-
+      expect(@called).to eq(3) # event was not emitted again
 
 
       # One-time event
       @once = 0
       @e.once('one_time', proc { @once += 1 })
-      expect(@e.subscribers('one_time').length).to eq(1)
+      expect(@e.subscribers('one_time').length).to eq(1) # one subscriber
       @e.emit('one_time')
-      expect(@once).to eq(1)
-      expect(@e.subscribers('one_time').length).to eq(0)
+      expect(@once).to eq(1) # event was emitted once
+      expect(@e.subscribers('one_time').length).to eq(0) # no subscribers
       @e.emit('one_time')
-      expect(@once).to eq(1)
+      expect(@once).to eq(1) # event was not emitted again
       @e.emit('one_time')
-      expect(@once).to eq(1)
+      expect(@once).to eq(1) # event was not emitted again
       @e.emit('one_time')
-      expect(@once).to eq(1)
+      expect(@once).to eq(1) # event was not emitted again
       @e.once('one_time', proc {|obj, args|
                 obj.once('one_time', proc { @once += 1 })
               })
       @e.emit('one_time')
-      expect(@once).to eq(1)
+      expect(@once).to eq(1) # event was emited once
       @e.emit('one_time')
-      expect(@once).to eq(2)
+      expect(@once).to eq(2) # event was emitted again
       @e.emit('one_time')
-      expect(@once).to eq(2)
+      expect(@once).to eq(2) # event was not emitted again
       @e.once('one_time', proc {|obj, args|
                 @once = obj.has_subscribers('one_time')
               })
       @e.emit('one_time')
-      expect(@once).to be_false
+      expect(@once).to be_false # no subscribers
 
 
       # Nested one-time events
@@ -116,22 +111,22 @@ describe "Mojo::EventEmitter" do
                            obj.once('one_time', proc { @once += 1 })
                          })
               })
-      expect(@e.subscribers('one_time').length).to eq(1)
+      expect(@e.subscribers('one_time').length).to eq(1) # one subscriber
       @e.emit('one_time')
-      expect(@once).to eq(0)
-      expect(@e.subscribers('one_time').length).to eq(1)
+      expect(@once).to eq(0) # only first event was emitted
+      expect(@e.subscribers('one_time').length).to eq(1) # one subscriber
       @e.emit('one_time')
-      expect(@once).to eq(0)
-      expect(@e.subscribers('one_time').length).to eq(1)
+      expect(@once).to eq(0) # only second event was emitted
+      expect(@e.subscribers('one_time').length).to eq(1) # one subscriber
       @e.emit('one_time')
-      expect(@once).to eq(1)
-      expect(@e.subscribers('one_time').length).to eq(0)
+      expect(@once).to eq(1) # third event was emitted
+      expect(@e.subscribers('one_time').length).to eq(0) # no subscribers
       @e.emit('one_time')
-      expect(@once).to eq(1)
+      expect(@once).to eq(1) # event was not emitted again
       @e.emit('one_time')
-      expect(@once).to eq(1)
+      expect(@once).to eq(1) # event was not emitted again
       @e.emit('one_time')
-      expect(@once).to eq(1)
+      expect(@once).to eq(1) # event was not emitted again
 
 
       # Unsubscribe
@@ -141,15 +136,16 @@ describe "Mojo::EventEmitter" do
       @e.on('foo', proc { counter += 1 })
       @e.on('foo', proc { counter += 1 })
       @e.unsubscribe('foo', @e.once('foo', proc { counter += 1 }))
-      expect(@e.subscribers('foo').length).to eq(3)
+      expect(@e.subscribers('foo').length).to eq(3) # three subscribers
       @e.emit('foo').unsubscribe('foo', cb)
-      expect(counter).to eq(3)
+      expect(counter).to eq(3) # event was emitted three times
       @e.emit('foo').unsubscribe('foo', cb)
-      expect(counter).to eq(5)
-      expect(@e.has_subscribers('foo')).to be_true
-      expect(@e.unsubscribe('foo').has_subscribers('foo')).to be_false
+      expect(counter).to eq(5) # event was emitted two times
+      expect(@e.has_subscribers('foo')).to be_true # has subscribers
+      expect(@e.unsubscribe('foo').has_subscribers('foo')).to be_false # no subscribers
+      expect(@e.subscribers('foo').length).to eq(0)
       @e.emit('foo')
-      expect(counter).to eq(5)
+      expect(counter).to eq(5) # event was not emitted again
 
 
 
