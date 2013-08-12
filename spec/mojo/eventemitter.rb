@@ -154,6 +154,22 @@ describe "Mojo::EventEmitter" do
       expect(@e.unsubscribe('foo').has_subscribers('foo')).to eq(false)
       @e.emit('foo')
       expect(counter).to eq(5)
+
+
+
+      # Pass by reference and assignment to $_
+      # $e = Mojo::EventEmitter->new;
+      # my $buffer = '';
+      # $e->on(one => sub { $_ = $_[1] .= 'abc' . $_[2] });
+      # $e->on(one => sub { $_[1] .= '123' . pop });
+      # is $buffer, '', 'no result';
+      # $e->emit(one => $buffer => 'two');
+      # is $buffer, 'abctwo123two', 'right result';
+      # $e->once(one => sub { $_[1] .= 'def' });
+      # $e->emit_safe(one => $buffer => 'three');
+      # is $buffer, 'abctwo123twoabcthree123threedef', 'right result';
+      # $e->emit(one => $buffer => 'x');
+      # is $buffer, 'abctwo123twoabcthree123threedefabcx123x', 'right result';
     end
   end
 
