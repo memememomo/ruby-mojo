@@ -6,12 +6,11 @@ module Mojo
       @events = Hash.new
     end
 
-    def emit( *args )
-      name = args.shift
+    def emit(name, *args)
       if s = @events[name] then
         warn "-- Emit #{name} in \n" if DEBUG == 1
         s.each do |cb|
-          cb.call(args.clone.unshift(self))
+          cb.call(self, args.clone)
         end
       else
         warn "-- Emit #{name} in " if DEBUG == 1
@@ -21,14 +20,13 @@ module Mojo
       self
     end
 
-    def emit_safe( *args )
-      name = args.shift
+    def emit_safe(name, *args)
 
       if s = @events[name] then
         warn "-- Emit #{name} in \n" if DEBUG == 1
         s.each do |cb|
           begin
-            cb.call(args.clone.unshift(self))
+            cb.call(self, args.clone)
           rescue Exception => ex
             if name == "error" then
               # Error event failed
@@ -57,13 +55,10 @@ module Mojo
       cb
     end
 
-    def once(*args)
-      name = args.shift
-      cb = args.shift
-
+    def once(name, cb, *args)
       wrapper = proc {
         self.unsubscribe(name, wrapper)
-        cb.call(args.clone.unshift(self))
+        cb.call(self, args.clone)
       }
       self.on(name, wrapper)
 

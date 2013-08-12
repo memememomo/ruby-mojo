@@ -41,13 +41,13 @@ describe "Mojo::EventEmitter" do
 
 
 
-      @e.on('error', proc {|args| @err = args.pop })
-      @e.on('test2', proc {|args| @echo += 'echo: ' + args.pop })
-      @e.on('test2', proc {|args|
+      @e.on('error', proc {|obj, args| @err = args.pop })
+      @e.on('test2', proc {|obj, args| @echo += 'echo: ' + args.pop })
+      @e.on('test2', proc {|obj, args|
               msg = args.pop
               raise "test2: #{msg}\n"
             })
-      cb = proc {|args| @echo += 'echo2: ' + args.pop }
+      cb = proc {|obj, args| @echo += 'echo2: ' + args.pop }
       @e.on('test2', cb)
       @e.emit_safe('test2', 'works!')
       expect(@echo).to eq("echo: works!echo2: works!")
@@ -91,8 +91,7 @@ describe "Mojo::EventEmitter" do
       expect(@once).to eq(1)
       @e.emit('one_time')
       expect(@once).to eq(1)
-      @e.once('one_time', proc {|args|
-                obj = args.shift
+      @e.once('one_time', proc {|obj, args|
                 obj.once('one_time', proc { @once += 1 })
               })
       @e.emit('one_time')
@@ -101,8 +100,7 @@ describe "Mojo::EventEmitter" do
       expect(@once).to eq(2)
       @e.emit('one_time')
       expect(@once).to eq(2)
-      @e.once('one_time', proc {|args|
-                obj = args[0]
+      @e.once('one_time', proc {|obj, args|
                 @once = obj.has_subscribers('one_time')
               })
       @e.emit('one_time')
@@ -112,11 +110,9 @@ describe "Mojo::EventEmitter" do
       # Nested one-time events
       @once = 0
       @e.once('one_time', proc {
-                |args|
-                obj = args[0]
+                |obj, args|
                 obj.once('one_time', proc {
-                           |args|
-                           obj = args[0]
+                           |obj, args|
                            obj.once('one_time', proc { @once += 1 })
                          })
               })
