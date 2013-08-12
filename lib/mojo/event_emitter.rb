@@ -75,7 +75,7 @@ module Mojo
       @events[name]
     end
 
-    def unsubscribe(name, cb)
+    def unsubscribe(name, cb = nil)
 
       if cb then
         # One

@@ -108,6 +108,7 @@ describe "Mojo::EventEmitter" do
       @e.emit('one_time')
       expect(@once).to eq(false)
 
+
       # Nested one-time events
       @once = 0
       @e.once('one_time', proc {
@@ -135,6 +136,24 @@ describe "Mojo::EventEmitter" do
       expect(@once).to eq(1)
       @e.emit('one_time')
       expect(@once).to eq(1)
+
+
+      # Unsubscribe
+      @e = Mojo::EventEmitter.new
+      counter = 0
+      cb = @e.on('foo', proc { counter += 1 })
+      @e.on('foo', proc { counter += 1 })
+      @e.on('foo', proc { counter += 1 })
+      @e.unsubscribe('foo', @e.once('foo', proc { counter += 1 }))
+      expect(@e.subscribers('foo').length).to eq(3)
+      @e.emit('foo').unsubscribe('foo', cb)
+      expect(counter).to eq(3)
+      @e.emit('foo').unsubscribe('foo', cb)
+      expect(counter).to eq(5)
+      expect(@e.has_subscribers('foo')).to eq(true)
+      expect(@e.unsubscribe('foo').has_subscribers('foo')).to eq(false)
+      @e.emit('foo')
+      expect(counter).to eq(5)
     end
   end
 
