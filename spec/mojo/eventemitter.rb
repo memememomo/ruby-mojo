@@ -104,7 +104,7 @@ describe "Mojo::EventEmitter" do
                 @once = obj.has_subscribers('one_time')
               })
       @e.emit('one_time')
-      expect(@once).to eq(false)
+      expect(@once).to be_false
 
 
       # Nested one-time events
@@ -146,8 +146,8 @@ describe "Mojo::EventEmitter" do
       expect(counter).to eq(3)
       @e.emit('foo').unsubscribe('foo', cb)
       expect(counter).to eq(5)
-      expect(@e.has_subscribers('foo')).to eq(true)
-      expect(@e.unsubscribe('foo').has_subscribers('foo')).to eq(false)
+      expect(@e.has_subscribers('foo')).to be_true
+      expect(@e.unsubscribe('foo').has_subscribers('foo')).to be_false
       @e.emit('foo')
       expect(counter).to eq(5)
 
