@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'rspec'
-require 'tempfile'
+require 'stringio'
 
 require 'mojo/event_emitter.rb'
 
@@ -25,17 +25,12 @@ describe "Mojo::EventEmitter" do
       expect { @e.emit('die') }.to raise_error("works!\n") # right error
 
       # Unhandled error event
-      @tempfile = Tempfile.open("stdouttest")
-      $stderr = File.open(@tempfile, "w")
+	  captured = StringIO.new
+	  $stderr = captured
       @e.emit("error", "just")
       @e.emit_safe("error", "works")
-      $stderr.flush
       $stderr = STDERR
-      @error = "";
-      File.open(@tempfile) {|f|
-        @error += f.read
-      }
-      expect(@error).to eq("just\nworks\n") # right error
+      expect(captured.string).to eq("just\nworks\n") # right error
 
 
       # Error fallback
