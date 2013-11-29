@@ -1,4 +1,57 @@
+# -*- coding: utf-8 -*-
+
 module Mojo
+  # == NAME
+  #
+  # Mojo::EventEmitter - Event emitter base class
+  #
+  # == SYNOPSIS
+  #
+  #   class Cat < Mojo::EventEmitter
+  #       def poke
+  #           self.emit('roar', 3)
+  #       end
+  #   end
+  #
+  #   tiger = Cat.new
+  #   tiger.on('roar', proc {|tiger, args|
+  #        times = args.pop
+  #        times.times{
+  #            puts 'RAWR!'
+  #        }
+  #   })
+  #   tiger.poke
+  #
+  # == DESCRIPTION
+  #
+  # <em>Mojo::EventEmitter</em> is a simple base class for event emitting objects.
+  #
+  # == EVENTS
+  #
+  # <em>Mojo::EventEmitter</em> can emit the following events. 
+  #
+  # === error
+  #
+  #
+  #   @e.on('error', proc {|e, args|
+  #       err = args.pop
+  #       ...
+  #   })
+  #
+  # Emitted for event errors, fatal if unhandled.
+  #
+  #   @e.on('error', proc {|e, args|
+  #       err = args.pop
+  #       puts "This Looks bad: #{err}"
+  #   })
+  #
+  # == DEBUGGING
+  #
+  # You can set the MOJO_EVENTEMITTER_DEBUG environment variable to get some
+  # advanced diagnostics information printed to <tt>STDERR</tt>.
+  #
+  #  MOJO_EVENTEMITTER_DEBUG=1
+  #
   class EventEmitter
     DEBUG = ENV["MOJO_EVENTEMITTER_DEBUG"] || 0
 
@@ -6,6 +59,12 @@ module Mojo
       @events = Hash.new
     end
 
+    #
+    #  e = e.emit('foo')
+    #  e = e.emit('foo', 123)
+    #
+    # Emit event.
+    #
     def emit(name, *args)
       if s = @events[name] then
         warn "-- Emit #{name} in \n" if DEBUG == 1
@@ -20,6 +79,12 @@ module Mojo
       self
     end
 
+    #
+    #  e = e.emit_safe('foo')
+    #  e = e.emit_safe('foo', 123)
+    # 
+    # Emit event.
+    #
     def emit_safe(name, *args)
 
       if s = @events[name] then
@@ -45,16 +110,36 @@ module Mojo
       self
     end
 
+    #
+    #  bool = e.has_subscribers('foo')
+    #
+    # Check if event has subscribers.
+    #
     def has_subscribers(name)
       self.subscribers(name).length > 0 ? true : false
     end
 
+    #
+    #  cb = e.on('foo', proc {|e, args|
+    #      ...
+    #  })
+    #
+    # on
     def on(name, cb)
       @events[name] ||= Array.new
       @events[name].push(cb)
       cb
     end
 
+    #
+    #  cb = e.once('foo', proc { ... })
+    #
+    # Subscribe to event and unsubscribe again after it has been emitted once.
+    #
+    #  e.once('foo', proc {|e, args|
+    #      ...
+    #  })
+    #
     def once(name, cb, *args)
       wrapper = proc {
         self.unsubscribe(name, wrapper)
@@ -65,11 +150,25 @@ module Mojo
       wrapper
     end
 
+    #
+    #  subscribers = e.subscribers('foo')
+    #
+    # All subscribers for event
+    #
+    #  # Unsubscribe last subscriber
+    #  e.unsubscribe('foo', e.subscribers('foo')[-1])
+    #
     def subscribers(name)
       @events[name] ||= Array.new
       @events[name]
     end
 
+    #
+    #  e = e.unsubscribe('foo')
+    #  e = e.unsubscribe('foo', cb)
+    #
+    # Unsubscribe from event.
+    #
     def unsubscribe(name, cb = nil)
 
       if cb then
