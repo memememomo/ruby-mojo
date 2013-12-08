@@ -25,8 +25,8 @@ describe "Mojo::EventEmitter" do
       expect { @e.emit('die') }.to raise_error("works!\n") # right error
 
       # Unhandled error event
-	  captured = StringIO.new
-	  $stderr = captured
+      captured = StringIO.new
+      $stderr = captured
       @e.emit("error", "just")
       @e.emit_safe("error", "works")
       $stderr = STDERR
