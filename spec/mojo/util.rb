@@ -14,4 +14,13 @@ describe 'Mojo::Util' do
       expect(Mojo::Util.camelize('Foo::Bar')).to eq('Foo::Bar')     # already camelized
     end
   end
+
+  context '#decamelize' do
+    it do
+      expect(Mojo::Util.decamelize('FooBarBaz')).to eq('foo_bar_baz')   # right decamelized result
+      expect(Mojo::Util.decamelize('foo_bar_baz')).to eq('foo_bar_baz') # right decamelized result
+      expect(Mojo::Util.decamelize('FooBB')).to eq('foo_b_b')           # right decamelized result
+      expect(Mojo::Util.decamelize('Foo::BB')).to eq('foo-b_b')         # right decamelized result
+    end
+  end
 end
