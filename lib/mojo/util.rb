@@ -3,7 +3,7 @@
 module Mojo
   module Util
     def self.camelize(str)
-      if str === /^[A-Z]/
+      if str =~ /^[A-Z]/
         return str
       end
      
