@@ -6,7 +6,7 @@ module Mojo
       if str =~ /^[A-Z]/
         return str
       end
-     
+
       # CamelCase words 
       str.split('-').map {|item1| 
         item1.split('_').map {|item2| item2.downcase.capitalize }.join('')
@@ -29,6 +29,12 @@ module Mojo
       end
 
       parts.join('-')
+    end
+
+    def self.class_to_file(class_str)
+      class_str = class_str.gsub(/(::|')/, '')
+      class_str = class_str.gsub(/([A-Z])([A-Z]*)/) { "#{$1}" + "#{$2}".downcase }
+      decamelize(class_str)
     end
   end
 end

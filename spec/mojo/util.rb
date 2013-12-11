@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'rspec'
 
-require 'mojo/util.rb'
+require 'mojo/util2.rb'
 
 describe 'Mojo::Util' do
   context '#camelize' do
@@ -23,4 +23,18 @@ describe 'Mojo::Util' do
       expect(Mojo::Util.decamelize('Foo::BB')).to eq('foo-b_b')         # right decamelized result
     end
   end
+
+  context '#class_to_file' do
+    it do
+      expect(Mojo::Util.class_to_file('Foo::Bar')).to eq('foo_bar')         # right file
+      expect(Mojo::Util.class_to_file('FooBar')).to eq('foo_bar')           # right file
+      expect(Mojo::Util.class_to_file('FOOBar')).to eq('foobar')            # right file
+      expect(Mojo::Util.class_to_file('FOOBAR')).to eq('foobar')            # right file
+      expect(Mojo::Util.class_to_file('FOO::Bar')).to eq('foobar')          # right file
+      expect(Mojo::Util.class_to_file('FooBAR')).to eq('foo_bar')           # right file
+      expect(Mojo::Util.class_to_file("Foo'BAR")).to eq('foo_bar')          # right file
+      expect(Mojo::Util.class_to_file("Foo'Bar::Baz")).to eq('foo_bar_baz') # right file
+    end
+  end
+
 end
