@@ -36,5 +36,9 @@ module Mojo
       class_str = class_str.gsub(/([A-Z])([A-Z]*)/) { "#{$1}" + "#{$2}".downcase }
       decamelize(class_str)
     end
+
+    def self.class_to_path(class_str)
+      class_str.split(/::|'/).join('/') + '.' + 'pm'
+    end
   end
 end

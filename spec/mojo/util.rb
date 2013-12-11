@@ -37,4 +37,14 @@ describe 'Mojo::Util' do
     end
   end
 
+  context '#class_to_path' do
+    it do
+      expect(Mojo::Util.class_to_path('Foo::Bar')).to eq('Foo/Bar.pm')         # right path
+      expect(Mojo::Util.class_to_path("Foo'Bar")).to eq('Foo/Bar.pm')          # right path
+      expect(Mojo::Util.class_to_path("Foo'Bar::Baz")).to eq('Foo/Bar/Baz.pm') # right path
+      expect(Mojo::Util.class_to_path("Foo::Bar'Baz")).to eq('Foo/Bar/Baz.pm') # right path
+      expect(Mojo::Util.class_to_path("Foo'Bar'Baz")).to eq('Foo/Bar/Baz.pm')  # right path
+    end
+  end
+
 end
