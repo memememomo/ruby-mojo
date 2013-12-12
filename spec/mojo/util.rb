@@ -47,4 +47,15 @@ describe 'Mojo::Util' do
     end
   end
 
+  context '#get_line' do
+    it do
+      buffer = "foo\x0d\x0abar\x0dbaz\x0ayada\x0d\x0a"
+      expect(Mojo::Util.get_line(buffer)).to eq('foo')        # right line
+      expect(buffer).to eq("bar\x0dbaz\x0ayada\x0d\x0a")      # right line
+      expect(Mojo::Util.get_line(buffer)).to eq("bar\x0dbaz") # right line
+      expect(buffer).to eq("yada\x0d\x0a")                    # right line
+      expect(Mojo::Util.get_line(buffer)).to eq("yada")       # right line
+      expect(buffer).to eq("")                                # no line
+    end
+  end
 end

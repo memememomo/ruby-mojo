@@ -40,5 +40,20 @@ module Mojo
     def self.class_to_path(class_str)
       class_str.split(/::|'/).join('/') + '.' + 'pm'
     end
+
+    def self.get_line(str)
+
+      # Locate line ending
+      if (pos = str.index("\x0a")) == nil 
+        return nil
+      end
+
+      # Extract line and ending
+      line = str.slice(0, pos + 1)
+      str[0..pos] = '' 
+      line = line.sub(/\x0d?\x0a$/, '')
+
+      line
+    end
   end
 end
