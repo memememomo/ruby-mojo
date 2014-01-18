@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'rspec'
 
-require 'mojo/util2.rb'
+require 'mojo/util.rb'
 
 describe 'Mojo::Util' do
   context '#camelize' do
@@ -9,7 +9,7 @@ describe 'Mojo::Util' do
       expect(Mojo::Util.camelize('foo_bar_baz')).to eq('FooBarBaz') # right camelized result
       expect(Mojo::Util.camelize('FooBarBaz')).to eq('FooBarBaz')   # right camelized result
       expect(Mojo::Util.camelize('foo_b_b')).to eq('FooBB')         # right camelized result
-      expect(Mojo::Util.camelize('foo-b_b')).to eq('Foo::BB')         # right camelized result
+      expect(Mojo::Util.camelize('foo-b_b')).to eq('Foo::BB')       # right camelized result
       expect(Mojo::Util.camelize('FooBar')).to eq('FooBar')         # already camelized
       expect(Mojo::Util.camelize('Foo::Bar')).to eq('Foo::Bar')     # already camelized
     end
@@ -56,6 +56,16 @@ describe 'Mojo::Util' do
       expect(buffer).to eq("yada\x0d\x0a")                    # right line
       expect(Mojo::Util.get_line(buffer)).to eq("yada")       # right line
       expect(buffer).to eq("")                                # no line
+    end
+  end
+
+  context '#split_header' do
+    it do
+      expect(Mojo::Util.split_header('')).to match_array [] # right result
+      expect(Mojo::Util.split_header('foo=b=a=r')).to match_array [['foo', 'b=a=r']] # right result
+      expect(Mojo::Util.split_header(',,foo,, ,bar')).to match_array [['foo', nil], ['bar', nil]] # right result
+      expect(Mojo::Util.split_header(';;foo;; ;bar')).to match_array [['foo', nil, 'bar', nil]] # right result
+      expect(Mojo::Util.split_header('foo=;bar=""')).to match_array [['foo', '', 'bar', '']] # right result
     end
   end
 end
