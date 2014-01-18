@@ -67,27 +67,24 @@ describe 'Mojo::Util' do
       expect(Mojo::Util.split_header(';;foo;; ;bar')).to match_array [['foo', nil, 'bar', nil]] # right result
       expect(Mojo::Util.split_header('foo=;bar=""')).to match_array [['foo', '', 'bar', '']] # right result
       expect(Mojo::Util.split_header('foo=bar baz=yada')).to match_array [['foo', 'bar', 'baz', 'yada']]
-#is_deeply split_header('foo,bar,baz'),
-#  [['foo', undef], ['bar', undef], ['baz', undef]], 'right result';
-#is_deeply split_header('f "o" o , ba  r'),
-#  [['f', undef, '"o"', undef, 'o', undef], ['ba', undef, 'r', undef]],
-#  'right result';
-#is_deeply split_header('foo="b,; a\" r\"\\\\"'), [['foo', 'b,; a" r"\\']],
-#  'right result';
-#is_deeply split_header('foo = "b a\" r\"\\\\"'), [['foo', 'b a" r"\\']],
-#  'right result';
-#my $header = q{</foo/bar>; rel="x"; t*=UTF-8'de'a%20b};
-#my $tree = [['</foo/bar>', undef, 'rel', 'x', 't*', 'UTF-8\'de\'a%20b']];
-#is_deeply split_header($header), $tree, 'right result';
-#$header = 'a=b c; A=b.c; D=/E; a-b=3; F=Thu, 07 Aug 2008 07:07:59 GMT; Ab;';
-#$tree   = [
-#  ['a', 'b', 'c', undef, 'A', 'b.c', 'D', '/E', 'a-b', '3', 'F', 'Thu'],
-#  [
-#    '07',       undef, 'Aug', undef, '2008', undef,
-#    '07:07:59', undef, 'GMT', undef, 'Ab',   undef
-#  ]
-#];
-#is_deeply split_header($header), $tree, 'right result';
+      expect(Mojo::Util.split_header('foo,bar,baz')).to match_array [['foo', nil], ['bar', nil], ['baz', nil]]
+      expect(Mojo::Util.split_header('f "o" o , ba r')).to match_array [['f', nil, '"o"', nil, 'o', nil], ['ba', nil, 'r', nil]]
+      expect(Mojo::Util.split_header('foo="b,; a\" r\"\\\\"')).to match_array [['foo', 'b,; a" r"\\']]
+      expect(Mojo::Util.split_header('foo = "b a\" r\"\\\\"')).to match_array [['foo', 'b a" r"\\']]
+
+      header = %q{</foo/bar>; rel="x"; t*=UTF-8'de'a%20b}
+      tree = [['</foo/bar>', nil, 'rel', 'x', 't*', 'UTF-8\'de\'a%20b']]
+      expect(Mojo::Util.split_header(header)).to match_array tree
+
+      header = 'a=b c; A=b.c; D=/E; a-b=3; F=Thu, 07 Aug 2008 07:07:59 GMT; Ab;'
+      tree   = [
+        ['a', 'b', 'c', nil, 'A', 'b.c', 'D', '/E', 'a-b', '3', 'F', 'Thu'],
+        [
+          '07'      , nil, 'Aug', nil, '2008', nil,
+          '07:07:59', nil, 'GMT', nil, 'Ab',   nil
+        ]
+      ];
+      expect(Mojo::Util.split_header(header)).to match_array tree
     end
   end
 end

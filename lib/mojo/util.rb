@@ -60,7 +60,7 @@ module Mojo
       tree = []
       token = []
       while str.length > 0
-        str = str.sub(/^[,;\s]*([^=;,]+)\s*/) {
+        str = str.sub(/^[,;\s]*([^=;, ]+)\s*/) {
           token.push($1)
           ""
         }
@@ -93,6 +93,9 @@ module Mojo
     end
 
     def self.unquote(str)
+      if str !~ /^"(.*)"$/
+        return str
+      end
       str = str.gsub(/^"(.*)"$/, "#{$1}")
       str = str.gsub(/\\\\/, "\\")
       str = str.gsub(/\\"/, "\"")
