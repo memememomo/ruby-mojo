@@ -32,8 +32,8 @@ module Mojo
     end
 
     def self.class_to_file(class_str)
-      class_str = class_str.gsub(/(::|')/, '')
-      class_str = class_str.gsub(/([A-Z])([A-Z]*)/) { "#{$1}" + "#{$2}".downcase }
+      class_str.gsub!(/(::|')/, '')
+      class_str.gsub!(/([A-Z])([A-Z]*)/) { "#{$1}" + "#{$2}".downcase }
       decamelize(class_str)
     end
 
@@ -60,23 +60,21 @@ module Mojo
       tree = []
       token = []
       while str.length > 0
-        str = str.sub(/^[,;\s]*([^=;, ]+)\s*/) {
+        str.sub!(/^[,;\s]*([^=;, ]+)\s*/) {
           token.push($1)
           ""
         }
         token.push(nil)
 
-        if str =~ /^=\s*("(?:\\\\|\\"|[^"])*"|[^;, ]*)\s*/
+        if str.sub!(/^=\s*("(?:\\\\|\\"|[^"])*"|[^;, ]*)\s*/, "")
           token[-1] = unquote($1)
-          str = str.sub(/^=\s*("(?:\\\\|\\"|[^"])*"|[^;, ]*)\s*/, "")
         end
 
         # Separator
-        str = str.sub(/^;\s*/, '')
-        if str !~ /^,\s*/
+        str.sub!(/^;\s*/, '')
+        if ! str.sub!(/^,\s*/, '')
           next
         end
-        str = str.sub(/^,\s*/, '')
 
         if token.length > 0
           tree.push(token)
@@ -96,9 +94,9 @@ module Mojo
       if str !~ /^"(.*)"$/
         return str
       end
-      str = str.gsub(/^"(.*)"$/, "#{$1}")
-      str = str.gsub(/\\\\/, "\\")
-      str = str.gsub(/\\"/, "\"")
+      str.gsub!(/^"(.*)"$/, "#{$1}")
+      str.gsub!(/\\\\/, "\\")
+      str.gsub!(/\\"/, "\"")
       str
     end
   end
